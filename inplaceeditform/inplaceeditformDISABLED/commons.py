@@ -43,7 +43,7 @@ def get_dict_from_obj(obj):
         if key.endswith('_id'):
             key2 = key.replace('_id', '')
             try:
-                field = obj._meta.get_field(key2)
+                field, model, direct, m2m = obj._meta.get_field(key2)
                 if isinstance(field, ForeignKey):
                     obj_dict_result[key2] = obj_dict_result[key]
                     del obj_dict_result[key]
@@ -81,10 +81,10 @@ def import_module(name, package=None):
 def get_adaptor_class(adaptor=None, obj=None, field_name=None):
     if not adaptor:
         try:
-            field = obj._meta.get_field(field_name)
+            field = obj._meta.get_field(field_name)[0]
         except FieldDoesNotExist:
             if has_transmeta:
-                field = obj._meta.get_field(transmeta.get_real_fieldname(field_name))
+                field = obj._meta.get_field(transmeta.get_real_fieldname(field_name))[0]
         if isinstance(field, models.URLField):
             adaptor = 'url'
         elif isinstance(field, models.EmailField):

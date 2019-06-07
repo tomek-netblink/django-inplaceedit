@@ -14,22 +14,24 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this programe.  If not, see <http://www.gnu.org/licenses/>.
 
-try:
-    # from django.urls import patterns, url
-    from django.conf.urls import url
-except ImportError:  # Django < 1.4
-    from django.conf.urls.defaults import patterns, url
+from inplaceeditform.commons import get_module_name
 
 
-# urlpatterns = patterns('inplaceeditform.views',
-#     url(r'^save/$', 'save_ajax', name='inplace_save'),
-#     url(r'^get_field/$', 'get_field', name='inplace_get_field')
-# )
-from .views import save_ajax, get_field
+class SuperUserPermEditInline(object):
 
-# app_label = 'inplaceeditform'
+    @classmethod
+    def can_edit(cls, field):
+        return field.request.user.is_authenticated and field.request.user.is_superuser
 
-urlpatterns = [
-    url(r'^save/$', save_ajax, name='inplace_save'),
-    url(r'^get_field/$', get_field, name='inplace_get_field')
-]
+
+class AdminDjangoPermEditInline(SuperUserPermEditInline):
+
+    @classmethod
+    def can_edit(cls, field):
+        is_super_user = super(AdminDjangoPermEditInline, cls).can_edit(field)
+        if not is_super_user:
+            model = field.model
+            model_edit = '%s.change_%s' % (model._meta.app_label,
+                                           get_module_name(model))
+            return field.request.user.has_perm(model_edit)
+        return is_super_user
