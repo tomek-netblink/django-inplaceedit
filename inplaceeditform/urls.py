@@ -15,8 +15,8 @@
 # along with this programe.  If not, see <http://www.gnu.org/licenses/>.
 
 try:
-    # from django.urls import patterns, url
-    from django.conf.urls import url
+    from django.urls import patterns, url
+    # from django.conf.urls import url
 except ImportError:  # Django < 1.4
     from django.conf.urls.defaults import patterns, url
 
